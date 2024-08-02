@@ -1,4 +1,4 @@
-import { Uri, QuickPickItem } from "vscode";
+import * as vscode from "vscode";
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -8,29 +8,24 @@ export enum FileType {
     symbolicLink
 }
 
-export class FileItem implements QuickPickItem {
-    description?: string;
-    detail?: string;
-    fileIcon?: string;
-    filePath: string;
-    fileType: FileType|undefined;
-    label: string;
+export class FileItem {
+    name: string;
+    path: string;
+    type?: FileType;
     
-    constructor(uri: Uri) {
-        this.label = path.basename(uri.fsPath);
-        this.filePath = uri.fsPath;
-        this.description = 'description';
-        this.detail = this.filePath;
+    constructor(uri: vscode.Uri) {
+        this.name = path.basename(uri.fsPath);
+        this.path = uri.fsPath;
     }
 }
 
-export async function getFileItem(uri: Uri): Promise<FileItem> {
+export async function getFileItem(uri: vscode.Uri): Promise<FileItem> {
     let item: FileItem = new FileItem(uri);
-    item.fileType = await getFileType(uri);
+    item.type = await getFileType(uri);
     return item;
 }
 
-async function getFileType(uri: Uri): Promise<FileType|undefined> {
+async function getFileType(uri: vscode.Uri): Promise<FileType|undefined> {
     const fileStat = await fs.stat(uri.fsPath);
     if (fileStat.isDirectory()) {
         return FileType.directory;
